@@ -13,19 +13,28 @@ export const eventTypeDefs = `#graphql
   }
   type PlatoonSchemaTypes {
     _id: ID!
-    createdAt: Date
+    name: String
+    color: String
+    image: String
     squads: [SquadsSchemaTypes]
   }
   type SquadsSchemaTypes {
     _id: ID!
-    createdAt: Date
+    name: String,
     roles: [RoleSchemaTypes]
+    busyRoles: [UsedSchemaTypes]
+    waitingList: [UsedSchemaTypes]
+    enlisted: [UsedSchemaTypes]
   }
   type RoleSchemaTypes {
     _id: ID!
-    createdAt: Date
     name: String
     count: Int
+  }
+  type UsedSchemaTypes {
+    _id: ID!
+    discordId: String
+    role: String
   }
   
   input CreateEventInput {
@@ -58,12 +67,25 @@ export const eventTypeDefs = `#graphql
     image: String
   }
   input AddRoleToSquadInput {
-    data: AddRoleToSquadInputData
-    _id: ID
+    squadId: ID
+    data: RoleInputData
   }
-  input AddRoleToSquadInputData {
+  input ChangeAllRolesInSquadInput {
+    squadId: ID
+    data: [RoleInputData]
+  }
+  input RoleInputData {
     name: String
     count: Int
+  }
+  input DeleteRoleFromSquadInput {
+    squadId: ID
+    roleId: ID
+  }
+  input AddUserToEventInput {
+    squadId: ID
+    roleId: ID
+    roleName: String
   }
 
   type Query {
@@ -73,8 +95,11 @@ export const eventTypeDefs = `#graphql
   type Mutation {
     createEvent(createEventInput: CreateEventInput): Event
     updateEvent(updateEventInput: UpdateEventInput): Event
+
     addRoleToSquad(addRoleToSquadInput: AddRoleToSquadInput): Event
-    changeRoleInSquad(changeRoleInSquadInput: AddRoleToSquadInput): Event
-    deleteRoleFromSquad(deleteRoleFromSquadInput: AddRoleToSquadInput): Event
+    changeAllRolesInSquad(changeAllRolesInSquadInput: ChangeAllRolesInSquadInput): Event
+    deleteRoleFromSquad(deleteRoleFromSquadInput: DeleteRoleFromSquadInput): Event
+
+    addUserToEvent(addUserToEventInput: AddUserToEventInput): Event
   }
 `;

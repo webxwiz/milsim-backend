@@ -5,8 +5,8 @@ import { checkAdminAuth, checkAuth, generateToken } from "../utils/_index.js";
 
 class UserService {
     async getUserByToken(token: string) {
-        const id = checkAuth(token);
-        const user = await UserModel.findById(id);
+        const { _id } = checkAuth(token);
+        const user = await UserModel.findById(_id);
         if (!user) {
             throw new GraphQLError("Can't find user");
         }

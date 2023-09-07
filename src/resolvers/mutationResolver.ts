@@ -7,7 +7,6 @@ const mutationResolver = {
     Mutation: {
         saveUser: async (parent: any, { discordId }: { discordId: string }) => {
             const { user, token } = await userService.saveUser(discordId);
-
             return { user, token };
         },
 
@@ -20,7 +19,6 @@ const mutationResolver = {
                 discordId,
                 contextValue.token
             );
-
             return {
                 userStatus,
                 message: "User successfully deleted",
@@ -36,9 +34,9 @@ const mutationResolver = {
                 createEventInput,
                 contextValue.token
             );
-
             return event;
         },
+
         updateEvent: async (
             parent: any,
             {
@@ -50,35 +48,79 @@ const mutationResolver = {
                 updateEventInput,
                 contextValue.token
             );
-
             return event;
         },
         addRoleToSquad: async (
             parent: any,
             {
                 addRoleToSquadInput,
-            }: { addRoleToSquadInput: { data: IRoleTypes; _id: string } },
+            }: {
+                addRoleToSquadInput: { data: IRoleTypes; squadId: string };
+            },
             contextValue: { token: string }
         ) => {
             const event = await eventService.addRoleToSquad(
                 addRoleToSquadInput,
                 contextValue.token
             );
-
             return event;
         },
-        changeRoleInSquad: async (
+
+        changeAllRolesInSquad: async (
             parent: any,
             {
-                changeRoleInSquadInput,
-            }: { changeRoleInSquadInput: { data: IRoleTypes; _id: string } },
+                changeAllRolesInSquadInput,
+            }: {
+                changeAllRolesInSquadInput: {
+                    data: IRoleTypes;
+                    squadId: string;
+                };
+            },
             contextValue: { token: string }
         ) => {
-            const event = await eventService.changeRoleInSquad(
-                changeRoleInSquadInput,
+            const event = await eventService.changeAllRolesInSquad(
+                changeAllRolesInSquadInput,
                 contextValue.token
             );
+            return event;
+        },
 
+        deleteRoleFromSquad: async (
+            parent: any,
+            {
+                deleteRoleFromSquadInput,
+            }: {
+                deleteRoleFromSquadInput: {
+                    roleId: string;
+                    squadId: string;
+                };
+            },
+            contextValue: { token: string }
+        ) => {
+            const event = await eventService.deleteRoleFromSquad(
+                deleteRoleFromSquadInput,
+                contextValue.token
+            );
+            return event;
+        },
+
+        addUserToEvent: async (
+            parent: any,
+            {
+                addUserToEventInput,
+            }: {
+                addUserToEventInput: {
+                    roleId: string;
+                    roleName: string;
+                    squadId: string;
+                };
+            },
+            contextValue: { token: string }
+        ) => {
+            const event = await eventService.addUserToEvent(
+                addUserToEventInput,
+                contextValue.token
+            );
             return event;
         },
     },

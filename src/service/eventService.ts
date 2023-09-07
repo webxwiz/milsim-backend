@@ -2,7 +2,7 @@ import { ObjectId } from "mongoose";
 import { GraphQLError } from "graphql";
 
 import EventModel from "../models/Event.js";
-import { logger, checkAdminAuth } from "../utils/_index.js";
+import { logger, checkAdminAuth, checkAuth } from "../utils/_index.js";
 
 import { ICreateEvent, IRoleTypes, IUpdateEvent } from "../types/eventTypes.js";
 
@@ -61,47 +61,103 @@ class EventService {
     }
 
     async addRoleToSquad(
-        { data, _id }: { data: IRoleTypes; _id: string },
+        { data, squadId }: { data: IRoleTypes; squadId: string },
         token: string
     ) {
-        checkAdminAuth(token);
-        const updatedSquad = await EventModel.findOneAndUpdate(
-            { "platoons.squads._id": _id },
+        // checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons.squads._id": squadId },
             {
                 $push: { "platoons.$[].squads.$[xxx].roles": data },
             },
-            { arrayFilters: [{ "xxx._id": _id }], new: true }
+            { arrayFilters: [{ "xxx._id": squadId }], new: true }
         );
-        if (!updatedSquad) {
+        if (!updatedEvent) {
             logger.error("Modified forbidden in addRoleToSquad");
             throw new GraphQLError("Modified forbidden");
-        } else return updatedSquad;
+        } else return updatedEvent;
     }
 
-    async changeRoleInSquad(
-        { data, _id }: { data: IRoleTypes; _id: string },
+    async changeAllRolesInSquad(
+        { data, squadId }: { data: IRoleTypes; squadId: string },
         token: string
     ) {
-        checkAdminAuth(token);
-        const updatedSquad = await EventModel.findOneAndUpdate(
-            { "platoons.squads": { _id } },
+        // checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons.squads._id": squadId },
             {
-                $pull: {
-                    "platoons.$[].squads.$[xxx].roles": {
-                        _id: "64f9baba319fa2ee702f7d03",
+                $set: {
+                    "platoons.$[].squads.$[xxx].roles": data,
+                },
+            },
+            { arrayFilters: [{ "xxx._id": squadId }], new: true }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in changeAllRolesInSquad");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
+
+    async deleteRoleFromSquad(
+        { squadId, roleId }: { squadId: string; roleId: string },
+        token: string
+    ) {
+        // checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons.squads._id": squadId },
+            {
+                $pull: { "platoons.$[].squads.$[xxx].roles": { _id: roleId } },
+            },
+            { arrayFilters: [{ "xxx._id": squadId }], new: true }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in deleteRoleFromSquad");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
+
+    async addPlatoonByEventId() {}
+
+    async changePlatoonById() {}
+
+    async deletePlatoonById() {}
+
+    async addSquadByPlatoonId() {}
+
+    async changeSquadById() {}
+
+    async deleteSquadById() {}
+
+    async addUserToEvent(
+        { roleName, roleId, squadId }: { roleName: string; roleId: string; squadId: string; },
+        token: string
+    ) {
+        const { _id } = checkAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons.squads.roles._id": roleId },
+            {
+                $inc: {
+                    "platoons.$[].squads.$[].roles.$[xxx].count": -1,
+                },
+                $push: {
+                    "platoons.$[].squads.$[yyy].busyRoles": {
+                        discordId: _id,
+                        role: roleName,
                     },
                 },
             },
-            { arrayFilters: [{ "xxx._id": _id }], new: true }
+            {
+                arrayFilters: [
+                    { "xxx._id": roleId, "xxx.count": { $gt: 0 } },
+                    { "yyy._id": squadId },
+                ],
+                new: true,
+            }
         );
-        if (!updatedSquad) {
-            logger.error("Modified forbidden in addRoleToSquad");
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in addUserToEvent");
             throw new GraphQLError("Modified forbidden");
-        } else return updatedSquad;
-    }
-
-    async deleteRoleFromSquad(token: string) {
-        checkAdminAuth(token);
+        } else return updatedEvent;
     }
 }
 
