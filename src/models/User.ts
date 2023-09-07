@@ -3,7 +3,7 @@ const { Schema, model } = mongoose;
 
 const userSchema = new Schema(
     {
-        email: {
+        discordId: {
             type: String,
             required: true,
             unique: true,

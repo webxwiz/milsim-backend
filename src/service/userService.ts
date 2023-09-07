@@ -1,11 +1,7 @@
-import bcrypt from "bcrypt";
-import crypto from "crypto";
-
 import { GraphQLError } from "graphql";
 
 import UserModel from "../models/User.js";
-import { checkAuth } from "../utils/_index.js";
-import { userValidate } from "../validation/userValidation.js";
+import { checkAdminAuth, checkAuth, generateToken } from "../utils/_index.js";
 
 class UserService {
     async getUserByToken(token: string) {
@@ -27,35 +23,29 @@ class UserService {
         return users;
     }
 
-    async saveUser(email: string) {
-        await userValidate({ email });
-        const candidate = await UserModel.findOne({ email });
-        if (candidate) {
-            throw new GraphQLError(`User ${email} already exist`, {
-                extensions: { code: "BAD_USER_INPUT" },
-            });
+    async saveUser(discordId: string) {
+        const candidate = await UserModel.findOne({ discordId });
+        if (!candidate) {
+            const user = await UserModel.create({ discordId });
+            if (!user) {
+                throw new GraphQLError("Database Error", {
+                    extensions: { code: "DATABASE_ERROR" },
+                });
+            }
+            const token = generateToken(discordId, user.role);
+            return { user, token };
+        } else {
+            const token = generateToken(discordId, candidate.role);
+            return { user: candidate, token };
         }
-
-        const user = await UserModel.create({ email });
-        if (!user) {
-            throw new GraphQLError("Database Error", {
-                extensions: { code: "DATABASE_ERROR" },
-            });
-        }
-
-        return user;
     }
 
-    async deleteUser(email: string, token: string) {
-        const { role } = checkAuth(token);
+    async deleteUser(discordId: string, token: string) {
+        await checkAdminAuth(token);
 
-        if (role === "ADMIN") {
-            const userStatus = await UserModel.deleteOne({ email });
+        const userStatus = await UserModel.deleteOne({ discordId });
 
-            return userStatus;
-        } else {
-            throw new GraphQLError("Authorization error");
-        }
+        return userStatus;
     }
 }
 

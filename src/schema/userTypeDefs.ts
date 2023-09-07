@@ -2,14 +2,13 @@ export const userTypeDefs = `#graphql
   scalar Date
   type User {
       _id: ID!
-      email: String!             
+      discordId: String!             
       role: String!
       createdAt: Date                    
   }
   type UserWithToken {
       user: User        
-      token: String
-      message: String              
+      token: String             
   }
   type UserDeleteResponse {        
       userStatus: UserDeleteStatus
@@ -25,7 +24,7 @@ export const userTypeDefs = `#graphql
     getAllUsers: [User]    
   }
   type Mutation {
-    saveUser(email: String!): User
-    deleteUser(email: String!): UserDeleteResponse
+    saveUser(discordId: String!): UserWithToken
+    deleteUser(discordId: String!): UserDeleteResponse
   }
 `;

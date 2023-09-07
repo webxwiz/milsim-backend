@@ -11,7 +11,8 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 
-import { userTypeDefs } from "./schema/_index.js";
+import router from "./router/router.js";
+import { eventTypeDefs, userTypeDefs } from "./schema/_index.js";
 import { queryResolver, mutationResolver } from "./resolvers/_index.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { logger } from "./utils/_index.js";
@@ -19,7 +20,7 @@ import { logger } from "./utils/_index.js";
 import "dotenv/config";
 
 mongoose
-    .connect(process.env.MONGO_DB || "")
+    .connect(process.env.MONGO_DB!)
     .then(() => logger.info("Mongo DB successfully connected..."))
     .catch((err) => logger.error(`Mongo DB Error: ${err}`));
 
@@ -27,6 +28,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/api', router);
 
 const port = process.env.PORT || 4004;
 
@@ -37,7 +39,7 @@ const wsServer = new WebSocketServer({
 });
 
 const schema = makeExecutableSchema({
-    typeDefs: userTypeDefs,
+    typeDefs: userTypeDefs.concat(eventTypeDefs),
     resolvers: { ...queryResolver, ...mutationResolver },
 });
 
