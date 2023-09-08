@@ -46,9 +46,13 @@ export const eventTypeDefs = `#graphql
     platoons: [PlatoonInput]
   }
   input PlatoonInput {
+    name: String
+    color: String
+    image: String
     squads: [SquadsInput]
   }
   input SquadsInput {
+    name: String
     roles: [RoleInput]
   }
   input RoleInput {
