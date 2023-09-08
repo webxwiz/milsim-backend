@@ -123,6 +123,25 @@ const mutationResolver = {
             );
             return event;
         },
+
+        removeFromBusyRoles: async (
+            parent: any,
+            {
+                removeFromBusyRolesInput,
+            }: {
+                removeFromBusyRolesInput: {
+                    roleId: string;
+                    squadId: string;
+                };
+            },
+            contextValue: { token: string }
+        ) => {
+            const event = await eventService.removeFromBusyRoles(
+                removeFromBusyRolesInput,
+                contextValue.token
+            );
+            return event;
+        },
     },
 };
 
