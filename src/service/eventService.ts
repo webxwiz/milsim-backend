@@ -118,13 +118,9 @@ class EventService {
 
     async addPlatoonByEventId() {}
 
-    async changePlatoonById() {}
-
     async deletePlatoonById() {}
 
     async addSquadByPlatoonId() {}
-
-    async changeSquadById() {}
 
     async deleteSquadById() {}
 
