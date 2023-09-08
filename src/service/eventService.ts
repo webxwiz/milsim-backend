@@ -129,7 +129,11 @@ class EventService {
     async deleteSquadById() {}
 
     async addUserToEvent(
-        { roleName, roleId, squadId }: { roleName: string; roleId: string; squadId: string; },
+        {
+            roleName,
+            roleId,
+            squadId,
+        }: { roleName: string; roleId: string; squadId: string },
         token: string
     ) {
         const { _id } = checkAuth(token);
@@ -149,8 +153,38 @@ class EventService {
             {
                 arrayFilters: [
                     { "xxx._id": roleId, "xxx.count": { $gt: 0 } },
-                    { "yyy._id": squadId },
+                    {
+                        "yyy._id": squadId,
+                        "yyy.busyRoles.discordId": { $ne: _id },
+                        "yyy.roles.count": { $ne: 0 },
+                    },
                 ],
+                new: true,
+            }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in addUserToEvent");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
+
+    async removeFromBusyRoles(
+        { roleId, squadId }: { roleId: string; squadId: string },
+        token: string
+    ) {
+        const { _id } = checkAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons.squads._id": squadId },
+            {
+                $inc: {
+                    "platoons.$[].squads.$[].roles.$[xxx].count": 1,
+                },
+                $pull: {
+                    "platoons.$[].squads.$[yyy].busyRoles": { discordId: _id },
+                },
+            },
+            {
+                arrayFilters: [{ "xxx._id": roleId }, { "yyy._id": squadId }],
                 new: true,
             }
         );

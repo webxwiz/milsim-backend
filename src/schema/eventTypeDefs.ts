@@ -46,9 +46,13 @@ export const eventTypeDefs = `#graphql
     platoons: [PlatoonInput]
   }
   input PlatoonInput {
+    name: String
+    color: String
+    image: String
     squads: [SquadsInput]
   }
   input SquadsInput {
+    name: String
     roles: [RoleInput]
   }
   input RoleInput {
@@ -87,6 +91,10 @@ export const eventTypeDefs = `#graphql
     roleId: ID
     roleName: String
   }
+  input RemoveFromBusyRolesInput {
+    squadId: ID
+    roleId: ID
+  }
 
   type Query {
     getAllEvents: [Event]
@@ -101,5 +109,6 @@ export const eventTypeDefs = `#graphql
     deleteRoleFromSquad(deleteRoleFromSquadInput: DeleteRoleFromSquadInput): Event
 
     addUserToEvent(addUserToEventInput: AddUserToEventInput): Event
+    removeFromBusyRoles(removeFromBusyRolesInput: RemoveFromBusyRolesInput): Event
   }
 `;
