@@ -27,7 +27,7 @@ const queryResolver = {
             return events;
         },
 
-        getOneEvent: async (parent: any, { _id }: { _id: ObjectId }) => {
+        getOneEvent: async (parent: any, { _id }: { _id: string }) => {
             const event = await eventService.getOneEvent(_id);
 
             return event;
