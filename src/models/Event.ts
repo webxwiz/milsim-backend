@@ -57,3 +57,12 @@ const eventSchema = new Schema({
 });
 
 export default model("Event", eventSchema);
+
+// const eventSchema = new Schema({
+//     name: String,
+//     date: Date,
+//     duration: Number,
+//     description: String,
+//     image: String,
+//     platoons: [platoonSchema],
+// },
