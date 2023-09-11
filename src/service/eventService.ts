@@ -32,6 +32,20 @@ class EventService {
         return event;
     }
 
+    async getEventsByFinished(finished: boolean) {
+        let events;
+        if (finished) {
+            events = await EventModel.find({ date: { $lte: Date.now() } });
+        } else {
+            events = await EventModel.find({ date: { $gt: Date.now() } });
+        }
+        if (!events) {
+            logger.error("Can't find events in getEventsByFinished");
+            throw new GraphQLError("Can't find events");
+        }
+        return events;
+    }
+
     async createEvent(data: IEvent, token: string) {
         checkAdminAuth(token);
 

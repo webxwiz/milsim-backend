@@ -114,7 +114,8 @@ export const eventTypeDefs = `#graphql
 
   type Query {
     getAllEvents: [Event]
-    getOneEvent(_id: ID): Event      
+    getOneEvent(_id: ID): Event
+    getEventsByFinished(finished: Boolean): [Event]     
   }
   type Mutation {
     createEvent(createEventInput: EventInput): Event
