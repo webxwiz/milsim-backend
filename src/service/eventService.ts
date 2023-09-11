@@ -1,10 +1,15 @@
-import { ObjectId } from "mongoose";
 import { GraphQLError } from "graphql";
 
 import EventModel from "../models/Event.js";
 import { logger, checkAdminAuth, checkAuth } from "../utils/_index.js";
 
-import { ICreateEvent, IRoleTypes, IUpdateEvent } from "../types/eventTypes.js";
+import {
+    IEvent,
+    IPlatoon,
+    IRole,
+    ISquad,
+    IUsedRoles,
+} from "../types/eventTypes.js";
 
 class EventService {
     async getAllEvents() {
@@ -17,7 +22,7 @@ class EventService {
         return events;
     }
 
-    async getOneEvent(_id: ObjectId) {
+    async getOneEvent(_id: string) {
         const event = await EventModel.findOne({ _id });
         if (!event) {
             logger.error("Can't find event in getOneEvent");
@@ -27,7 +32,7 @@ class EventService {
         return event;
     }
 
-    async createEvent(data: ICreateEvent, token: string) {
+    async createEvent(data: IEvent, token: string) {
         checkAdminAuth(token);
 
         const event = EventModel.create({ ...data });
@@ -42,7 +47,7 @@ class EventService {
     }
 
     async updateEvent(
-        { data, _id }: { data: IUpdateEvent; _id: string },
+        { data, _id }: { data: IEvent; _id: string },
         token: string
     ) {
         checkAdminAuth(token);
@@ -61,10 +66,10 @@ class EventService {
     }
 
     async addRoleToSquad(
-        { data, squadId }: { data: IRoleTypes; squadId: string },
+        { data, squadId }: { data: IRole; squadId: string },
         token: string
     ) {
-        // checkAdminAuth(token);
+        checkAdminAuth(token);
         const updatedEvent = await EventModel.findOneAndUpdate(
             { "platoons.squads._id": squadId },
             {
@@ -79,10 +84,10 @@ class EventService {
     }
 
     async changeAllRolesInSquad(
-        { data, squadId }: { data: IRoleTypes; squadId: string },
+        { data, squadId }: { data: IRole; squadId: string },
         token: string
     ) {
-        // checkAdminAuth(token);
+        checkAdminAuth(token);
         const updatedEvent = await EventModel.findOneAndUpdate(
             { "platoons.squads._id": squadId },
             {
@@ -102,7 +107,7 @@ class EventService {
         { squadId, roleId }: { squadId: string; roleId: string },
         token: string
     ) {
-        // checkAdminAuth(token);
+        checkAdminAuth(token);
         const updatedEvent = await EventModel.findOneAndUpdate(
             { "platoons.squads._id": squadId },
             {
@@ -116,17 +121,77 @@ class EventService {
         } else return updatedEvent;
     }
 
-    async addPlatoonByEventId() {}
+    async addPlatoonByEventId(
+        { eventId, platoon }: { eventId: string; platoon: IPlatoon },
+        token: string
+    ) {
+        checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { _id: eventId },
+            {
+                $push: { platoons: platoon },
+            },
+            { new: true }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in addPlatoonByEventId");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
 
-    async changePlatoonById() {}
+    async deletePlatoonById(
+        { eventId, platoonId }: { eventId: string; platoonId: string },
+        token: string
+    ) {
+        checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { _id: eventId },
+            {
+                $pull: { platoons: { _id: platoonId } },
+            },
+            { new: true }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in addPlatoonByEventId");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
 
-    async deletePlatoonById() {}
+    async addSquadByPlatoonId(
+        { platoonId, squad }: { platoonId: string; squad: ISquad },
+        token: string
+    ) {
+        checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons._id": platoonId },
+            {
+                $push: { "platoons.$[].squads": squad },
+            },
+            { new: true }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in addSquadByPlatoonId");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
 
-    async addSquadByPlatoonId() {}
-
-    async changeSquadById() {}
-
-    async deleteSquadById() {}
+    async deleteSquadById(
+        { squadId, platoonId }: { platoonId: string; squadId: string },
+        token: string
+    ) {
+        checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons._id": platoonId },
+            {
+                $pull: { "platoons.$[].squads": { _id: squadId } },
+            },
+            { new: true }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in deleteSquadById");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
 
     async addUserToEvent(
         {
@@ -189,7 +254,75 @@ class EventService {
             }
         );
         if (!updatedEvent) {
-            logger.error("Modified forbidden in addUserToEvent");
+            logger.error("Modified forbidden in removeFromBusyRoles");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
+
+    async addToWaitingList(
+        { squadId, usedRole }: { squadId: string; usedRole: IUsedRoles },
+        token: string
+    ) {
+        checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons.squads._id": squadId },
+            {
+                $inc: {
+                    "platoons.$[].squads.$[].roles.$[xxx].count": 1,
+                },
+                $pull: {
+                    "platoons.$[].squads.$[yyy].busyRoles": {
+                        discordId: usedRole.discordId,
+                    },
+                },
+                $push: {
+                    "platoons.$[].squads.$[yyy].waitingList": usedRole,
+                },
+            },
+            {
+                arrayFilters: [
+                    { "xxx.name": usedRole.role },
+                    { "yyy._id": squadId },
+                ],
+                new: true,
+            }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in addToWaitingList");
+            throw new GraphQLError("Modified forbidden");
+        } else return updatedEvent;
+    }
+
+    async addToBusyRoles(
+        { squadId, usedRole }: { squadId: string; usedRole: IUsedRoles },
+        token: string
+    ) {
+        checkAdminAuth(token);
+        const updatedEvent = await EventModel.findOneAndUpdate(
+            { "platoons.squads._id": squadId },
+            {
+                $inc: {
+                    "platoons.$[].squads.$[].roles.$[xxx].count": -1,
+                },
+                $pull: {
+                    "platoons.$[].squads.$[yyy].waitingList": {
+                        discordId: usedRole.discordId,
+                    },
+                },
+                $push: {
+                    "platoons.$[].squads.$[yyy].busyRoles": usedRole,
+                },
+            },
+            {
+                arrayFilters: [
+                    { "xxx.name": usedRole.role },
+                    { "yyy._id": squadId },
+                ],
+                new: true,
+            }
+        );
+        if (!updatedEvent) {
+            logger.error("Modified forbidden in addToBusyRoles");
             throw new GraphQLError("Modified forbidden");
         } else return updatedEvent;
     }
