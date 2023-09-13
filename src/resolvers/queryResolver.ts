@@ -2,6 +2,7 @@ import { ObjectId } from "mongoose";
 
 import userService from "../service/userService.js";
 import eventService from "../service/eventService.js";
+import { bool } from "aws-sdk/clients/signer.js";
 
 const queryResolver = {
     Query: {
@@ -31,6 +32,15 @@ const queryResolver = {
             const event = await eventService.getOneEvent(_id);
 
             return event;
+        },
+
+        getEventsByFinished: async (
+            parent: any,
+            { finished }: { finished: boolean }
+        ) => {
+            const events = await eventService.getEventsByFinished(finished);
+
+            return events;
         },
     },
 };
