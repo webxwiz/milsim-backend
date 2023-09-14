@@ -6,7 +6,7 @@ import { checkAdminAuth, checkAuth, generateToken } from "../utils/_index.js";
 class UserService {
     async getUserByToken(token: string) {
         const { _id } = checkAuth(token);
-        const user = await UserModel.findById(_id);
+        const user = await UserModel.findOne({ discordId: _id });
         if (!user) {
             throw new GraphQLError("Can't find user");
         }
