@@ -342,6 +342,17 @@ class EventService {
             throw new GraphQLError("Modified forbidden");
         } else return updatedEvent;
     }
+
+    
+    async deleteEvent(_id: string, token: string) {
+        await checkAdminAuth(token);
+
+        const eventStatus = await EventModel.deleteOne({_id});
+        if (!eventStatus) {
+            throw new GraphQLError("Something went wrong")
+        }
+        return "Done";
+    }
 }
 
 export default new EventService();

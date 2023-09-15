@@ -56,6 +56,21 @@ const mutationResolver = {
             );
             return event;
         },
+
+        deleteEvent: async (
+            parent: any,
+            {
+                _id,
+            }: { _id: string },
+            contextValue: { token: string }
+        ) => {
+            const event = await eventService.deleteEvent(
+                _id,
+                contextValue.token
+            );
+            return event;
+        },
+
         addRoleToSquad: async (
             parent: any,
             {

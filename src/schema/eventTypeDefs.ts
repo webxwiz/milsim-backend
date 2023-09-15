@@ -123,6 +123,7 @@ export const eventTypeDefs = `#graphql
   type Mutation {
     createEvent(createEventInput: EventInput): Event
     updateEvent(updateEventInput: UpdateEventInput): Event
+    deleteEvent(_id: ID): String
 
     addRoleToSquad(addRoleToSquadInput: AddRoleToSquadInput): Event
     changeAllRolesInSquad(changeAllRolesInSquadInput: ChangeAllRolesInSquadInput): Event
