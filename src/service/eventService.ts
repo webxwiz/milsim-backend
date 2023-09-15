@@ -47,7 +47,7 @@ class EventService {
     }
 
     async createEvent(data: IEvent, token: string) {
-        checkAdminAuth(token);
+        // checkAdminAuth(token);
 
         const event = EventModel.create({ ...data });
         if (!event) {
@@ -212,7 +212,8 @@ class EventService {
             roleName,
             roleId,
             squadId,
-        }: { roleName: string; roleId: string; squadId: string },
+            playerName
+        }: { roleName: string; roleId: string; squadId: string,  playerName: string },
         token: string
     ) {
         const { _id } = checkAuth(token);
@@ -226,6 +227,7 @@ class EventService {
                     "platoons.$[].squads.$[yyy].busyRoles": {
                         discordId: _id,
                         role: roleName,
+                        playerName
                     },
                 },
             },

@@ -35,6 +35,7 @@ export const eventTypeDefs = `#graphql
     _id: ID!
     discordId: String
     role: String
+    playerName: String
   }
   
   input EventInput {
@@ -65,6 +66,7 @@ export const eventTypeDefs = `#graphql
   input UsedRolesInput {
     discordId: String
     role: String
+    playerName: String
   }
   input UpdateEventInput {
     data: EventInput
@@ -86,6 +88,7 @@ export const eventTypeDefs = `#graphql
     squadId: ID
     roleId: ID
     roleName: String
+    playerName: String
   }
   input RemoveFromBusyRolesInput {
     squadId: ID

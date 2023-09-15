@@ -25,6 +25,7 @@ export interface ISquad {
 export interface IUsedRoles {
     discordId: string;
     role: string;
+    playerName: string
 }
 
 export interface IRole {

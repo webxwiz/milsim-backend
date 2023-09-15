@@ -1,3 +1,5 @@
 [error] : [2023-09-08T18:24:36.074Z] - Modified forbidden in addPlatoonByEventId
 [error] : [2023-09-08T18:25:37.298Z] - Modified forbidden in addPlatoonByEventId
 [error] : [2023-09-08T19:37:30.085Z] - Modified forbidden in addSquadByPlatoonId
+[error] : [2023-09-14T08:55:36.126Z] - Mongo DB Error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.fyfwxmm.mongodb.net
+[error] : [2023-09-14T08:56:07.867Z] - Mongo DB Error: Error: querySrv ECONNREFUSED _mongodb._tcp.cluster0.fyfwxmm.mongodb.net
