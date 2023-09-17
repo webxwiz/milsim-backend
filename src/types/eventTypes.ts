@@ -26,6 +26,7 @@ export interface IUsedRoles {
     discordId: string;
     role: string;
     playerName: string
+    roleDiscordId: number
 }
 
 export interface IRole {

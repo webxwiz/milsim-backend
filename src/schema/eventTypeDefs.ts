@@ -36,6 +36,7 @@ export const eventTypeDefs = `#graphql
     discordId: String
     role: String
     playerName: String
+    roleDiscordId: Int
   }
   
   input EventInput {
