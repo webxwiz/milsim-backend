@@ -26,7 +26,11 @@ mongoose
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://combinedinitiative.com', // замените на URL вашего веб-приложения
+    methods: ['GET', 'POST'], // методы, которые вы хотите разрешить
+    allowedHeaders: ['Content-Type', 'Authorization'] // заголовки, которые вы хотите разрешить
+  }));
 app.use(express.json());
 app.use('/api', router);
 
@@ -73,6 +77,7 @@ app.use(
         },
     })
 );
+
 
 app.use(errorHandler);
 

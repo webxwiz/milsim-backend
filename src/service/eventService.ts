@@ -155,7 +155,7 @@ class EventService {
         { squadId, roleId }: { squadId: string; roleId: string },
         token: string
     ) {
-        checkAdminAuth(token);
+        // checkAdminAuth(token);
         const updatedEvent = await EventModel.findOneAndUpdate(
             { "platoons.squads._id": squadId },
             {
@@ -253,16 +253,35 @@ class EventService {
         const { _id } = checkAuth(token);
 
         // const userId = process.env.DISCORD_USER_ID!;
-        const eventReceive = await EventModel.findOne({ "platoons.squads.roles._id": roleId });
+        const eventReceive = await EventModel.findOne({
+            "platoons.squads.roles._id": roleId,
+            "platoons.squads.roles.count": { $gt: 0 },
+            "platoons.squads._id": squadId
+          });
+          
 
         if (!eventReceive) {
             throw new GraphQLError("Event isn't received");
         }
+        let discordColor
+        if (eventReceive) {
+            const platoonsArray = eventReceive.platoons; // Получаем массив "platoons" из найденного объекта
+            if (platoonsArray && Array.isArray(platoonsArray)) {
+              for (const platoon of platoonsArray) {
+                if (platoon.color) {
+                  discordColor = platoon.color;
+                }
+              }
+            }
+          }
+
+        // console.log(eventReceive)
+        console.log(discordColor)
         const date = eventReceive.date || new Date(); 
         const guild = await client.guilds.fetch(guildId);
         const role = await guild.roles.create({
             name: `${eventReceive.name} - ${formatBeautifulDate(date)}`,
-            color: 'Random', // Цвет роли (может быть строкой или числом)
+            color: Number(discordColor) || 'Random', // Цвет роли (может быть строкой или числом)
             permissions: ['SendMessages'], // Права роли (см. документацию Discord.js)
           });
         const updatedEvent = await EventModel.findOneAndUpdate(

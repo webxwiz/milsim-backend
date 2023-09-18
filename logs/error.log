@@ -21,3 +21,24 @@
 [error] : [2023-09-16T09:37:23.814Z] - Can't find event in getOneEvent
 [error] : [2023-09-17T02:55:43.131Z] - Modified forbidden in removeFromBusyRoles
 [error] : [2023-09-17T02:56:30.395Z] - Modified forbidden in removeFromBusyRoles
+[error] : [2023-09-17T17:52:53.783Z] - Can't find event in getOneEvent
+[error] : [2023-09-17T17:54:44.917Z] - Can't find event in getOneEvent
+[error] : [2023-09-17T17:54:57.208Z] - Can't find event in getOneEvent
+[error] : [2023-09-17T17:55:12.847Z] - UriParameterError: Expected uri parameter to have length >= 1, but found "" for params.Bucket
+[error] : [2023-09-17T17:55:40.605Z] - UriParameterError: Expected uri parameter to have length >= 1, but found "" for params.Bucket
+[error] : [2023-09-17T17:56:52.703Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T17:20:09.410Z] - Mongo DB Error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+[error] : [2023-09-18T17:22:29.618Z] - Mongo DB Error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+[error] : [2023-09-18T17:28:28.903Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T17:28:41.192Z] - SignatureDoesNotMatch: The request signature we calculated does not match the signature you provided. Check your key and signing method.
+[error] : [2023-09-18T17:36:32.694Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T17:36:59.013Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T17:42:20.942Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T17:44:49.409Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T17:47:01.998Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T17:56:14.752Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T19:32:31.850Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T19:34:04.121Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T19:47:37.870Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T19:47:45.278Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T22:14:36.940Z] - Mongo DB Error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
