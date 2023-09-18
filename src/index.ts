@@ -27,10 +27,11 @@ mongoose
 const app = express();
 
 app.use(cors({
-    origin: 'https://combinedinitiative.com', // замените на URL вашего веб-приложения
-    methods: ['GET', 'POST'], // методы, которые вы хотите разрешить
-    allowedHeaders: ['Content-Type', 'Authorization'] // заголовки, которые вы хотите разрешить
+    origin: '*', // замените на URL вашего веб-приложения
+    methods: ['GET','HEAD','PUT', 'PATCH', 'POST', 'DELETE'], // методы, которые вы хотите разрешить
+    allowedHeaders: ['Content-Type', 'Authorization', 'authorization'] // заголовки, которые вы хотите разрешить
   }));
+  
 app.use(express.json());
 app.use('/api', router);
 
