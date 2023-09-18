@@ -42,7 +42,7 @@ export const eventTypeDefs = `#graphql
   input EventInput {
     name: String
     duration: Int
-    date: String
+    date: Date
     description: String
     image: String
     platoons: [PlatoonInput]
