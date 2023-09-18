@@ -33,7 +33,7 @@ app.use(cors({
   }));
   
 app.use(express.json());
-app.use('/api', router);
+app.use('/api',cors(), router);
 
 const port = process.env.PORT || 4004;
 
