@@ -210,7 +210,6 @@ const mutationResolver = {
                     roleId: string;
                     roleName: string;
                     squadId: string;
-                    playerName: string
                 };
             },
             contextValue: { token: string }

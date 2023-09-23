@@ -247,11 +247,12 @@ class EventService {
             roleName,
             roleId,
             squadId,
-            playerName
-        }: { roleName: string; roleId: string; squadId: string,  playerName: string },
+        }: { roleName: string; roleId: string; squadId: string},
         token: string
     ) {
         const { _id } = checkAuth(token);
+
+        const user = await User.findOne({discordId: _id})
 
         // const userId = process.env.DISCORD_USER_ID!;
         const eventReceive = await EventModel.findOne({
@@ -297,7 +298,7 @@ class EventService {
                     "platoons.$[].squads.$[yyy].busyRoles": {
                         discordId: _id,
                         role: roleName,
-                        playerName, 
+                        playerName: user.name, 
                         roleDiscordId: role.id
                     },
                 },
@@ -444,7 +445,7 @@ if (fetchedRole) {
             token: string
           ) {
             // const { _id } = checkAuth(token);
-            // await checkAdminAuth(token)
+            await checkAdminAuth(token)
           
             const eventReceive = await EventModel.findOne({
               "platoons.squads.roles._id": roleId,
@@ -542,7 +543,7 @@ if (fetchedRole) {
             token: string
           ) {
             // const { _id } = checkAuth(token);
-            // await checkAdminAuth(token)
+            await checkAdminAuth(token)
           console.log(roleName)
             const eventReceive = await EventModel.findOne({
               "platoons.squads.roles._id": roleId,
@@ -588,7 +589,7 @@ return updatedEvent
             token: string
         ) {
             // const { _id } = checkAuth(token);
-            // checkAdminAuth(token)
+            await checkAdminAuth(token)
     
             // const userId = process.env.DISCORD_USER_ID!;
             const eventReceive = await EventModel.findOne({

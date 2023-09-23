@@ -89,7 +89,6 @@ export const eventTypeDefs = `#graphql
     squadId: ID
     roleId: ID
     roleName: String
-    playerName: String
   }
   input AddToBusyRoleFromAdminInput {
     squadId: ID
