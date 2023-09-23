@@ -4,7 +4,8 @@ export const userTypeDefs = `#graphql
       _id: ID!
       discordId: String!             
       role: String!
-      createdAt: Date                    
+      createdAt: Date         
+      name: String           
   }
   type UserWithToken {
       user: User        
@@ -24,7 +25,7 @@ export const userTypeDefs = `#graphql
     getAllUsers: [User]    
   }
   type Mutation {
-    saveUser(discordId: String!): UserWithToken
+    saveUser(discordId: String!, name: String!): UserWithToken
     deleteUser(discordId: String!): UserDeleteResponse
   }
 `;

@@ -13,6 +13,10 @@ const userSchema = new Schema(
             enum: ["ADMIN", "USER"],
             default: "USER",
         },
+        name: {
+            type: String,
+            required: true
+        }
     },
     {
         timestamps: true,

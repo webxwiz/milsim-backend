@@ -13,6 +13,7 @@ import {
 
 import {Client } from "discord.js"
 import formatBeautifulDate from "../utils/beautyDate.js";
+import User from "../models/User.js";
 const token = process.env.DISCORD_TOKEN; 
 
 const client = new Client({
@@ -281,9 +282,11 @@ class EventService {
         const guild = await client.guilds.fetch(guildId);
         const role = await guild.roles.create({
             name: `${eventReceive.name} - ${formatBeautifulDate(date)}`,
-            color: Number(discordColor) || 'Random', // Цвет роли (может быть строкой или числом)
+            color: discordColor, // Цвет роли (может быть строкой или числом)
             permissions: ['SendMessages'], // Права роли (см. документацию Discord.js)
           });
+
+          console.log(role.id)
         const updatedEvent = await EventModel.findOneAndUpdate(
             { "platoons.squads.roles._id": roleId },
             {
@@ -318,8 +321,10 @@ class EventService {
 
         // console.log(role)
             const member = await guild.members.fetch(_id);
+            console.log(role.id);
+
             const fetchedRole = await guild.roles.fetch(role.id);
-    
+            // console.log(fetchedRole)
         if (fetchedRole) {
             let addRole = await member.roles.add(fetchedRole);
             if (!addRole) {
@@ -339,127 +344,386 @@ class EventService {
         return updatedEvent;
         }}
 
-    async removeFromBusyRoles(
-        { roleId, squadId }: { roleId: string; squadId: string },
-        token: string
-    ) {
-        const { _id } = checkAuth(token);
-        const updatedEvent = await EventModel.findOneAndUpdate(
-            { "platoons.squads._id": squadId },
+        async removeFromBusyRoles(
             {
-                $inc: {
-                    "platoons.$[].squads.$[].roles.$[xxx].count": 1,
-                },
-                $pull: {
-                    "platoons.$[].squads.$[yyy].busyRoles": { discordId: _id },
-                },
-            },
-            {
-                arrayFilters: [{ "xxx._id": roleId }, { "yyy._id": squadId }],
-                new: true,
+              roleName,
+              roleId,
+              squadId,
+            }: { roleName: string; roleId: string; squadId: string },
+            token: string
+          ) {
+            const { _id } = checkAuth(token);
+          
+            const eventReceive = await EventModel.findOne({
+              "platoons.squads.roles._id": roleId,
+              "platoons.squads.roles.count": { $gt: 0 },
+              "platoons.squads._id": squadId
+            });
+          
+            if (!eventReceive) {
+              throw new GraphQLError("Event isn't received");
             }
-        );
-        // const pipeline = [
-        //     {
-        //       $match: {
-        //         "platoons.squads._id": squadId,
-        //         "platoons.squads.roles._id": roleId, // Добавьте дополнительные условия фильтрации, если необходимо
-        //       },
-        //     },
-        //     {
-        //       $unwind: "$platoons",
-        //     },
-        //     {
-        //       $unwind: "$platoons.squads",
-        //     },
-        //     {
-        //       $unwind: "$platoons.squads.roles",
-        //     },
-        //     {
-        //       $unwind: "$platoons.squads.roles.busyRoles",
-        //     },
-        //     {
-        //       $match: {
-        //         "platoons.squads.roles.busyRoles.roleDiscordId": _id,
-        //       },
-        //     },
-        //     {
-        //       $project: {
-        //         _id: 0, // Исключите _id из результата
-        //         roleDiscordId: "$platoons.squads.roles.busyRoles.roleDiscordId",
-        //       },
-        //     },
-        //   ];
-          
-        //   const updatedEvent2 = await EventModel.aggregate(pipeline);
-        //   console.log(updatedEvent2)
-          
-        //   if (updatedEvent2.length > 0) {
-        //     const discordId = updatedEvent2[0].busyRoles[0].discordId;
-        //     console.log('discordId:', discordId);
-        //   } else {
-        //     logger.error("Modified forbidden in removeFromBusyRoles");
-        //     throw new GraphQLError("Modified forbidden");
-        //   }
-        if (!updatedEvent) {
-            logger.error("Modified forbidden in removeFromBusyRoles");
-            throw new GraphQLError("Modified forbidden");
-        } else {
-            // try {
-            //     const guild = await client.guilds.fetch(guildId);
-            //     const member = await guild.members.fetch(_id);
-            
-            //     if (member) {
-            //       const role = guild.roles.cache.get(); // Получаем объект роли по ID
-            
-            //       if (role) {
-            //         await member.roles.remove(role); // Удаляем роль у пользователя
-            //         console.log(`Роль ${role.name} удалена у пользователя ${member.user.tag}`);
-            //       } else {
-            //         console.log(`Роль с ID ${roleId} не найдена.`);
-            //       }
-            //     } else {
-            //       console.log(`Пользователь с ID ${_id} не найден.`);
-            //     }
-            //   } catch (error) {
-            //     console.error('Ошибка при выполнении операции:', error);
-            //   }
-            return updatedEvent;
-    }}
 
-    async addToWaitingList(
-        { squadId, usedRole }: { squadId: string; usedRole: IUsedRoles },
-        token: string
-    ) {
-        checkAdminAuth(token);
-        const updatedEvent = await EventModel.findOneAndUpdate(
-            { "platoons.squads._id": squadId },
-            {
+            const guild = await client.guilds.fetch(guildId);
+          
+            // Удалите роль из массива busyRoles
+            const updatedEvent = await EventModel.findOneAndUpdate(
+              { "platoons.squads.roles._id": roleId },
+              {
                 $inc: {
-                    "platoons.$[].squads.$[].roles.$[xxx].count": 1,
+                  "platoons.$[].squads.$[].roles.$[xxx].count": 1, // Увеличьте счетчик на 1, так как роль возвращается
                 },
-                $pull: {
-                    "platoons.$[].squads.$[yyy].busyRoles": {
-                        discordId: usedRole.discordId,
-                    },
+                $pull: { // Удалите роль из busyRoles
+                  "platoons.$[].squads.$[].busyRoles": {
+                    discordId: _id,
+                    role: roleName,
+                    // roleDiscordId: role.id
+                  },
                 },
-                $push: {
-                    "platoons.$[].squads.$[yyy].waitingList": usedRole,
-                },
-            },
-            {
+              },
+              {
                 arrayFilters: [
-                    { "xxx.name": usedRole.role },
-                    { "yyy._id": squadId },
+                  { "xxx._id": roleId },
                 ],
                 new: true,
-            }
-        );
-        if (!updatedEvent) {
-            logger.error("Modified forbidden in addToWaitingList");
-            throw new GraphQLError("Modified forbidden");
-        } else return updatedEvent;
+              }
+            );
+        // После выполнения findOneAndUpdate и получения обновленного документа updatedEvent
+
+// Найдите индекс объекта, который был удален из busyRoles
+const removedRoleIndex = eventReceive.platoons
+.flatMap(platoon => platoon.squads)
+.flatMap(squad => squad.busyRoles)
+.findIndex(role => role.discordId === _id && role.role === roleName);
+
+// if (removedRoleIndex !== -1) {
+const removedRole = eventReceive.platoons
+  .flatMap(platoon => platoon.squads)
+  .flatMap(squad => squad.busyRoles)
+  .splice(removedRoleIndex, 1)[0]; // Извлекаем удаленный объект из массива
+
+const roleDiscordId = removedRole.roleDiscordId;
+// } else {
+// console.log(`Объект с discordId: ${_id} и ролью: ${roleName} не найден в массиве busyRoles.`);
+// }
+
+            if (!updatedEvent) {
+              logger.error("Modified forbidden in removeUserFromEvent");
+              throw new GraphQLError("Modified forbidden");
+            } else {
+              // Найдите роль по ее ID
+              console.log(typeof roleDiscordId);
+
+              const member = await guild.members.fetch(_id);
+              const roleDiscordIdString = String(roleDiscordId);
+              console.log(typeof roleDiscordIdString)
+              console.log(guild)
+              const fetchedRole = await guild.roles.fetch(roleDiscordIdString);
+              console.log(fetchedRole)
+if (fetchedRole) {
+    let removeRole = await member.roles.remove(fetchedRole);
+    if (!removeRole) {
+        throw new GraphQLError("Discord role error!");
     }
+}            
+                // Добавьте роль пользователю
+                // await member.roles.remove(role);
+          
+                return updatedEvent;
+            }
+          }
+          
+          
+          async addToWaitingList(
+            {
+              roleName,
+              roleId,
+              squadId,
+              _id
+            }: { roleName: string; roleId: string; squadId: string, _id: string },
+            token: string
+          ) {
+            // const { _id } = checkAuth(token);
+            // await checkAdminAuth(token)
+          
+            const eventReceive = await EventModel.findOne({
+              "platoons.squads.roles._id": roleId,
+              "platoons.squads.roles.count": { $gt: 0 },
+              "platoons.squads._id": squadId
+            });
+          
+            if (!eventReceive) {
+              throw new GraphQLError("Event isn't received");
+            }
+
+            const guild = await client.guilds.fetch(guildId);
+            const user = await User.findOne({discordId: _id})
+            // Удалите роль из массива busyRoles
+            const updatedEvent = await EventModel.findOneAndUpdate(
+              { "platoons.squads.roles._id": roleId },
+              {
+                $inc: {
+                  "platoons.$[].squads.$[].roles.$[xxx].count": 1, // Увеличьте счетчик на 1, так как роль возвращается
+                },
+                $pull: { // Удалите роль из busyRoles
+                  "platoons.$[].squads.$[].busyRoles": {
+                    discordId: _id,
+                    role: roleName,
+                    // roleDiscordId: role.id
+                  },
+                },
+                $push: { // Добавить роль в waitingList
+                    "platoons.$[].squads.$[].waitingList": {
+                      discordId: _id,
+                      role: roleName,
+                      playerName: user.name
+                    },
+                  },
+              },
+              {
+                arrayFilters: [
+                  { "xxx._id": roleId },
+                ],
+                new: true,
+              }
+            );
+        // После выполнения findOneAndUpdate и получения обновленного документа updatedEvent
+
+// Найдите индекс объекта, который был удален из busyRoles
+const removedRoleIndex = eventReceive.platoons
+.flatMap(platoon => platoon.squads)
+.flatMap(squad => squad.busyRoles)
+.findIndex(role => role.discordId === _id && role.role === roleName);
+
+// if (removedRoleIndex !== -1) {
+const removedRole = eventReceive.platoons
+  .flatMap(platoon => platoon.squads)
+  .flatMap(squad => squad.busyRoles)
+  .splice(removedRoleIndex, 1)[0]; // Извлекаем удаленный объект из массива
+
+const roleDiscordId = removedRole.roleDiscordId;
+// } else {
+// console.log(`Объект с discordId: ${_id} и ролью: ${roleName} не найден в массиве busyRoles.`);
+// }
+
+            if (!updatedEvent) {
+              logger.error("Modified forbidden in removeUserFromEvent");
+              throw new GraphQLError("Modified forbidden");
+            } else {
+              // Найдите роль по ее ID
+              console.log(typeof roleDiscordId);
+
+              const member = await guild.members.fetch(_id);
+              const roleDiscordIdString = String(roleDiscordId);
+              console.log(typeof roleDiscordIdString)
+              console.log(guild)
+              const fetchedRole = await guild.roles.fetch(roleDiscordIdString);
+              console.log(fetchedRole)
+if (fetchedRole) {
+    let removeRole = await member.roles.remove(fetchedRole);
+    if (!removeRole) {
+        throw new GraphQLError("Discord role error!");
+    }
+}            
+                // Добавьте роль пользователю
+                // await member.roles.remove(role);
+          
+                return updatedEvent;
+            }
+          }
+
+          async deleteFromWaitingList(
+            {
+              roleName,
+              roleId,
+              squadId,
+              _id
+            }: { roleName: string; roleId: string; squadId: string, _id: string },
+            token: string
+          ) {
+            // const { _id } = checkAuth(token);
+            // await checkAdminAuth(token)
+          console.log(roleName)
+            const eventReceive = await EventModel.findOne({
+              "platoons.squads.roles._id": roleId,
+              "platoons.squads.roles.count": { $gt: 0 },
+              "platoons.squads._id": squadId
+            });
+          
+            if (!eventReceive) {
+              throw new GraphQLError("Event isn't received");
+            }
+
+            const user = await User.findOne({discordId: _id})
+            if (!user) {
+                throw new GraphQLError("User is undefined")
+            }
+            // Удалите роль из массива busyRoles
+            const updatedEvent = await EventModel.findOneAndUpdate(
+              { "platoons.squads.roles._id": roleId },
+              {
+                $pull: { // Добавить роль в waitingList
+                    "platoons.$[].squads.$[].waitingList": {
+                      discordId: _id,
+                      role: roleName,
+                      playerName: user.name
+                    },
+                  },
+              },
+              {
+                new: true,
+              }
+            );
+return updatedEvent
+          }
+
+          async addToBusyRoleFromAdmin(
+            {
+                roleName,
+                roleId,
+                squadId,
+
+                _id
+            }: { roleName: string; roleId: string; squadId: string, _id: string },
+            token: string
+        ) {
+            // const { _id } = checkAuth(token);
+            // checkAdminAuth(token)
+    
+            // const userId = process.env.DISCORD_USER_ID!;
+            const eventReceive = await EventModel.findOne({
+                "platoons.squads.roles._id": roleId,
+                "platoons.squads.roles.count": { $gt: 0 },
+                "platoons.squads._id": squadId
+              });
+              
+    
+            if (!eventReceive) {
+                throw new GraphQLError("Event isn't received");
+            }
+            let discordColor
+            if (eventReceive) {
+                const platoonsArray = eventReceive.platoons; // Получаем массив "platoons" из найденного объекта
+                if (platoonsArray && Array.isArray(platoonsArray)) {
+                  for (const platoon of platoonsArray) {
+                    if (platoon.color) {
+                      discordColor = platoon.color;
+                    }
+                  }
+                }
+              }
+    
+            // console.log(eventReceive)
+            console.log(discordColor)
+            const date = eventReceive.date || new Date(); 
+            const guild = await client.guilds.fetch(guildId);
+            const role = await guild.roles.create({
+                name: `${eventReceive.name} - ${formatBeautifulDate(date)}`,
+                color: discordColor, // Цвет роли (может быть строкой или числом)
+                permissions: ['SendMessages'], // Права роли (см. документацию Discord.js)
+              });
+    
+              console.log(role.id)
+              const user = await User.findOne({discordId: _id})
+            if (!user) {
+                throw new GraphQLError("User is undefined")
+            }
+            const updatedEvent = await EventModel.findOneAndUpdate(
+                { "platoons.squads.roles._id": roleId },
+                {
+                    $inc: {
+                        "platoons.$[].squads.$[].roles.$[xxx].count": -1,
+                    },
+                    $push: {
+                        "platoons.$[].squads.$[yyy].busyRoles": {
+                            discordId: _id,
+                            role: roleName,
+                            playerName: user.name, 
+                            roleDiscordId: role.id
+                        },
+                    },
+                    $pull: { // Добавить роль в waitingList
+                        "platoons.$[].squads.$[].waitingList": {
+                          discordId: _id,
+                          role: roleName,
+                          playerName: user.name
+                        },
+                      },
+                },
+                {
+                    arrayFilters: [
+                        { "xxx._id": roleId, "xxx.count": { $gt: 0 } },
+                        {
+                            "yyy._id": squadId,
+                            "yyy.busyRoles.discordId": { $ne: _id },
+                            "yyy.roles.count": { $ne: 0 },
+                        },
+                    ],
+                    new: true,
+                }
+            );
+            if (!updatedEvent) {
+                logger.error("Modified forbidden in addUserToEvent");
+                throw new GraphQLError("Modified forbidden");
+            } else {
+    
+            // console.log(role)
+                const member = await guild.members.fetch(_id);
+                console.log(role.id);
+    
+                const fetchedRole = await guild.roles.fetch(role.id);
+                // console.log(fetchedRole)
+            if (fetchedRole) {
+                let addRole = await member.roles.add(fetchedRole);
+                if (!addRole) {
+                    throw new GraphQLError("Discord role error!")
+            }
+            
+                  // Обновляем ID роли в объекте busyRoles
+    
+            } else {
+              console.log(`Роль с id ${roleId} не найдена.`);
+              // Здесь вы можете обработать ситуацию, когда роль не найдена.
+            }
+    
+       
+    
+            
+            return updatedEvent;
+            }}
+    // async addToWaitingList(
+    //     { squadId, usedRole }: { squadId: string; usedRole: IUsedRoles },
+    //     token: string
+    // ) {
+    //     checkAdminAuth(token);
+    //     const updatedEvent = await EventModel.findOneAndUpdate(
+    //         { "platoons.squads._id": squadId },
+    //         {
+    //             $inc: {
+    //                 "platoons.$[].squads.$[].roles.$[xxx].count": 1,
+    //             },
+    //             $pull: {
+    //                 "platoons.$[].squads.$[yyy].busyRoles": {
+    //                     discordId: usedRole.discordId,
+    //                 },
+    //             },
+    //             $push: {
+    //                 "platoons.$[].squads.$[yyy].waitingList": usedRole,
+    //             },
+    //         },
+    //         {
+    //             arrayFilters: [
+    //                 { "xxx.name": usedRole.role },
+    //                 { "yyy._id": squadId },
+    //             ],
+    //             new: true,
+    //         }
+    //     );
+    //     if (!updatedEvent) {
+    //         logger.error("Modified forbidden in addToWaitingList");
+    //         throw new GraphQLError("Modified forbidden");
+    //     } else return updatedEvent;
+    // }
 
     async addToBusyRoles(
         { squadId, usedRole }: { squadId: string; usedRole: IUsedRoles },

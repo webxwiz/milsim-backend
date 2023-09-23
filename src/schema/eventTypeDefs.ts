@@ -36,7 +36,7 @@ export const eventTypeDefs = `#graphql
     discordId: String
     role: String
     playerName: String
-    roleDiscordId: Int
+    roleDiscordId: String
   }
   
   input EventInput {
@@ -91,10 +91,25 @@ export const eventTypeDefs = `#graphql
     roleName: String
     playerName: String
   }
-  input RemoveFromBusyRolesInput {
+  input AddToBusyRoleFromAdminInput {
     squadId: ID
     roleId: ID
+    roleName: String
+    _id: String
   }
+  input RemoveFromBusyRolesInput {
+    roleName: String
+    roleId: ID
+    squadId: ID
+  }
+
+  input addToWaitingList{
+    _id: String
+    roleName: String
+    roleId: ID
+    squadId: ID
+  }
+
   input AddPlatoonByEventIdInput {
     eventId: ID
     platoon: PlatoonInput
@@ -136,9 +151,11 @@ export const eventTypeDefs = `#graphql
     deleteSquadById(deleteSquadByIdInput: DeleteSquadByIdInput): Event
 
     addUserToEvent(addUserToEventInput: AddUserToEventInput): Event
+    addToBusyRoleFromAdmin(addToBusyRoleFromAdminInput: AddToBusyRoleFromAdminInput): Event
     removeFromBusyRoles(removeFromBusyRolesInput: RemoveFromBusyRolesInput): Event
 
-    addToWaitingList(addToWaitingListInput: MoveUsedRoleInput): Event
+    addToWaitingList(addToWaitingListInput: addToWaitingList): Event
+    deleteFromWaitingList(deleteFromWaitingListInput: addToWaitingList): Event
     addToBusyRoles(addToBusyRolesInput: MoveUsedRoleInput): Event
   }
 `;

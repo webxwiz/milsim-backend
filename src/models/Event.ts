@@ -17,7 +17,7 @@ const usedRolesSchema = new Schema(
         discordId: String,
         role: String,
         playerName: String,
-        roleDiscordId: Number
+        roleDiscordId: String
     },
     {
         timestamps: true,

@@ -11,8 +11,8 @@ import {
 
 const mutationResolver = {
     Mutation: {
-        saveUser: async (parent: any, { discordId }: { discordId: string }) => {
-            const { user, token } = await userService.saveUser(discordId);
+        saveUser: async (parent: any, { discordId, name }: { discordId: string, name: string }) => {
+            const { user, token } = await userService.saveUser(discordId, name);
             return { user, token };
         },
 
@@ -221,6 +221,27 @@ const mutationResolver = {
             );
             return event;
         },
+        addToBusyRoleFromAdmin: async (
+            parent: any,
+            {
+                addToBusyRoleFromAdminInput,
+            }: {
+                addToBusyRoleFromAdminInput: {
+                    roleId: string;
+                    roleName: string;
+                    squadId: string;
+                    _id: string
+                };
+            },
+            contextValue: { token: string }
+        ) => {
+            const event = await eventService.addToBusyRoleFromAdmin(
+                addToBusyRoleFromAdminInput,
+                contextValue.token
+            );
+            return event;
+        },
+        
 
         removeFromBusyRoles: async (
             parent: any,
@@ -248,7 +269,9 @@ const mutationResolver = {
             }: {
                 addToWaitingListInput: {
                     squadId: string;
-                    usedRole: IUsedRoles;
+                    _id: string;
+                    roleName: string;
+                    roleId: string
                 };
             },
             contextValue: { token: string }
@@ -259,6 +282,27 @@ const mutationResolver = {
             );
             return event;
         },
+        deleteFromWaitingList: async (
+            parent: any,
+            {
+                deleteFromWaitingListInput,
+            }: {
+                deleteFromWaitingListInput: {
+                    squadId: string;
+                    _id: string;
+                    roleName: string;
+                    roleId: string
+                };
+            },
+            contextValue: { token: string }
+        ) => {
+            const event = await eventService.deleteFromWaitingList(
+                deleteFromWaitingListInput,
+                contextValue.token
+            );
+            return event;
+        },
+
 
         addToBusyRoles: async (
             parent: any,

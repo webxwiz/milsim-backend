@@ -42,3 +42,19 @@
 [error] : [2023-09-18T19:47:37.870Z] - Can't find event in getOneEvent
 [error] : [2023-09-18T19:47:45.278Z] - Can't find event in getOneEvent
 [error] : [2023-09-18T22:14:36.940Z] - Mongo DB Error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+[error] : [2023-09-18T22:41:40.224Z] - Mongo DB Error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+[error] : [2023-09-18T22:49:22.670Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T22:56:46.040Z] - Can't find event in getOneEvent
+[error] : [2023-09-18T22:57:24.486Z] - Can't find event in getOneEvent
+[error] : [2023-09-19T10:19:12.860Z] - Mongo DB Error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+[error] : [2023-09-19T10:19:32.141Z] - Mongo DB Error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+[error] : [2023-09-22T14:20:30.735Z] - Mongo DB Error: MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+[error] : [2023-09-22T15:59:59.771Z] - Can't find event in getOneEvent
+[error] : [2023-09-22T16:03:53.202Z] - Can't find event in getOneEvent
+[error] : [2023-09-22T16:07:54.037Z] - Can't find event in getOneEvent
+[error] : [2023-09-22T20:12:49.731Z] - Can't find event in getOneEvent
+[error] : [2023-09-22T20:13:07.695Z] - SignatureDoesNotMatch: The request signature we calculated does not match the signature you provided. Check your key and signing method.
+[error] : [2023-09-22T20:16:43.605Z] - SignatureDoesNotMatch: The request signature we calculated does not match the signature you provided. Check your key and signing method.
+[error] : [2023-09-22T20:19:58.153Z] - SignatureDoesNotMatch: The request signature we calculated does not match the signature you provided. Check your key and signing method.
+[error] : [2023-09-22T20:21:36.066Z] - Can't find event in getOneEvent
+[error] : [2023-09-22T20:28:09.779Z] - SignatureDoesNotMatch: The request signature we calculated does not match the signature you provided. Check your key and signing method.

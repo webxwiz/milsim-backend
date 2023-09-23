@@ -23,10 +23,10 @@ class UserService {
         return users;
     }
 
-    async saveUser(discordId: string) {
+    async saveUser(discordId: string, name: string) {
         const candidate = await UserModel.findOne({ discordId });
         if (!candidate) {
-            const user = await UserModel.create({ discordId });
+            const user = await UserModel.create({ discordId, name });
             if (!user) {
                 throw new GraphQLError("Database Error", {
                     extensions: { code: "DATABASE_ERROR" },
