@@ -250,6 +250,7 @@ const mutationResolver = {
                 removeFromBusyRolesInput: {
                     roleId: string;
                     squadId: string;
+                    roleName: string
                 };
             },
             contextValue: { token: string }

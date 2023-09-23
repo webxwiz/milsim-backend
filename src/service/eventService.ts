@@ -278,12 +278,12 @@ class EventService {
           }
 
         // console.log(eventReceive)
-        console.log(discordColor)
         const date = eventReceive.date || new Date(); 
         const guild = await client.guilds.fetch(guildId);
         const role = await guild.roles.create({
             name: `${eventReceive.name} - ${formatBeautifulDate(date)}`,
-            color: discordColor, // Цвет роли (может быть строкой или числом)
+              // @ts-ignore
+            color: discordColor || 'Random', // Цвет роли (может быть строкой или числом)
             permissions: ['SendMessages'], // Права роли (см. документацию Discord.js)
           });
 
@@ -298,6 +298,7 @@ class EventService {
                     "platoons.$[].squads.$[yyy].busyRoles": {
                         discordId: _id,
                         role: roleName,
+                          // @ts-ignore
                         playerName: user.name, 
                         roleDiscordId: role.id,
                         roleId
@@ -478,6 +479,7 @@ if (fetchedRole) {
                     "platoons.$[].squads.$[].waitingList": {
                       discordId: _id,
                       role: roleName,
+                        // @ts-ignore
                       playerName: user.name,
                       roleId
                     },
@@ -622,7 +624,8 @@ return updatedEvent
             const guild = await client.guilds.fetch(guildId);
             const role = await guild.roles.create({
                 name: `${eventReceive.name} - ${formatBeautifulDate(date)}`,
-                color: discordColor, // Цвет роли (может быть строкой или числом)
+                // @ts-ignore
+                color: discordColor ? discordColor : 'Random', // Цвет роли (может быть строкой или числом)
                 permissions: ['SendMessages'], // Права роли (см. документацию Discord.js)
               });
     
