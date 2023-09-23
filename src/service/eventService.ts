@@ -82,7 +82,7 @@ class EventService {
     }
 
     async createEvent(data: IEvent, token: string) {
-        checkAdminAuth(token);
+        // checkAdminAuth(token);
 
         const event = EventModel.create({ ...data });
         if (!event) {
@@ -299,7 +299,8 @@ class EventService {
                         discordId: _id,
                         role: roleName,
                         playerName: user.name, 
-                        roleDiscordId: role.id
+                        roleDiscordId: role.id,
+                        roleId
                     },
                 },
             },
@@ -445,7 +446,7 @@ if (fetchedRole) {
             token: string
           ) {
             // const { _id } = checkAuth(token);
-            await checkAdminAuth(token)
+            // await checkAdminAuth(token)
           
             const eventReceive = await EventModel.findOne({
               "platoons.squads.roles._id": roleId,
@@ -477,7 +478,8 @@ if (fetchedRole) {
                     "platoons.$[].squads.$[].waitingList": {
                       discordId: _id,
                       role: roleName,
-                      playerName: user.name
+                      playerName: user.name,
+                      roleId
                     },
                   },
               },
@@ -640,7 +642,8 @@ return updatedEvent
                             discordId: _id,
                             role: roleName,
                             playerName: user.name, 
-                            roleDiscordId: role.id
+                            roleDiscordId: role.id,
+                            roleId
                         },
                     },
                     $pull: { // Добавить роль в waitingList
