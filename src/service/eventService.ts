@@ -250,6 +250,7 @@ class EventService {
         }: { roleName: string; roleId: string; squadId: string},
         token: string
     ) {
+      console.log(token)
         const { _id } = checkAuth(token);
 
         const user = await User.findOne({discordId: _id})
@@ -768,7 +769,53 @@ return updatedEvent
 
     
     async deleteEvent(_id: string, token: string) {
-        await checkAdminAuth(token);
+      const event = await EventModel.findById(_id)
+      const findFirstBusyRoleInPlatoons = (platoons: any) => {
+        for (const platoon of platoons) {
+          for (const squad of platoon.squads) {
+            for (const busyRole of squad.busyRoles) {
+              if (busyRole) {
+                return busyRole;
+              }
+            }
+          }
+        }
+        return null;
+      };
+      const firstBusyRole = await findFirstBusyRoleInPlatoons(event?.platoons);
+
+      if (!firstBusyRole) {
+        throw new GraphQLError("No busy roles found")
+      }
+        // await checkAdminAuth(token);
+
+        const roleDiscordId = firstBusyRole.roleDiscordId;
+
+        console.log(roleDiscordId)
+      //discord
+        const guild = await client.guilds.fetch(guildId);
+
+        if (!guild) {
+          console.log('Guild not found');
+          return;
+        }
+        console.log(guild.roles)
+        // Получите объект роли по её ID
+        const role = guild.roles.cache.get(roleDiscordId);
+    
+        if (!role) {
+          console.log('Role not found');
+          return;
+        }
+    
+        // Удалите роль
+        role.delete()
+          .then(() => {
+            console.log(`Role ${role.name} has been deleted`);
+          })
+          .catch((error) => {
+            console.error(`Error deleting role: ${error}`);
+          });
 
         const eventStatus = await EventModel.deleteOne({_id});
         if (!eventStatus) {
